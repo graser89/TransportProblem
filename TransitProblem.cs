@@ -13,23 +13,81 @@ public class TransitProblemInt
         Points = points;
     }
 
-    public TransitProblemInt(int count,int maxVal)
-    {                      
+    public TransitProblemInt(int count, int maxVal)
+    {
         var rnd = new Random();
         var list = new List<PointInt>();
         for (int i = 0; i < count; i++)
             list.Add(new PointInt() { X = rnd.Next(maxVal), Y = rnd.Next(maxVal) });
         Points = list;
     }
-    public void SavetoFile(string filename)
+    public void SavetoFile(string filename, IEnumerable<Path> paths)
     {
+
         using var writer = new StreamWriter(filename);
-        writer.WriteLine($"Index;X;Y;");
+        foreach (var item in paths)
+        {
+            writer.WriteLine(item.ToString());
+        }
+
+        writer.WriteLine();
+        writer.WriteLine($"#Index;X;Y;");
         for (int i = 0; i < Points.Count; i++)
         {
             writer.WriteLine($"{i};{Points[i].X};{Points[i].Y};");
         }
 
+    }
+
+    public static (TransitProblemInt, List<Path>) CreateFromFile(string filename)
+    {
+        List<Path> paths = new();
+        List<string> linePaths = new();
+        //Dictionary<int, (int, int)> points = new();
+        List<PointInt> points = new();
+
+        using var reader = new StreamReader(filename);
+        bool isFirstLine = true;
+        while (!reader.EndOfStream)
+        {
+            var line = reader.ReadLine();
+            if (string.IsNullOrEmpty(line))
+                continue;
+            if (line.Contains("#Index"))
+                isFirstLine = false;
+            if (line[0] == '#')
+                continue;
+            if (isFirstLine)
+            {
+                //isFirstLine = false;
+                linePaths.Add(line);
+                //paths.Add(getPathByString(line));
+            }
+            else
+            {
+                var pointsArr = parseIntString(line);
+                if (pointsArr.Length >= 3)
+                {
+                    points.Add(new PointInt() { X = pointsArr[1], Y = pointsArr[2] });
+                    //points.Add(pointsArr[0], (pointsArr[1], pointsArr[2]));
+                }
+            }
+        }
+        TransitProblemInt problem = new(points);
+
+        foreach (var item in linePaths)
+            paths.Add(Path.GetPathByString(item, problem));
+        return (problem, paths);
+    }
+    public static int[] parseIntString(string line, char delimetr = ';')
+    {
+        List<int> result = new();
+        var str = line.Split(delimetr);
+        foreach (var item in str)
+            if (int.TryParse(item, out int chislo))
+                result.Add(chislo);
+
+        return result.ToArray();
     }
     public void PrintLn()
     {
@@ -84,7 +142,7 @@ public class TransitProblemInt
 
         }
         return result;
-        
+
     }
     public List<double> GetLengthsBeforPointAndSeqPoints(PointD p, List<int> indexs)
     {

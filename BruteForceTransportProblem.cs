@@ -32,7 +32,7 @@ public class BruteForceTransportProblem
             {
                 min = length;
                 min_index = i;
-            }    
+            }
             foreach (var item in elem)
                 //Console.Write($"{item} ");
                 print($"{item} ");
@@ -43,7 +43,7 @@ public class BruteForceTransportProblem
         printLn("");
         printLn("");
         printLn($"Minimum Result");
-        var elem2= elements[min_index];            
+        var elem2 = elements[min_index];
         foreach (var item in elem2)
             //Console.Write($"{item} ");
             print($"{item} ");
@@ -85,7 +85,7 @@ public class BruteForceTransportProblem
         Console.WriteLine($"point x={item.X:f3} y={item.Y:f3}");
     }
 
-    public void AnalyzePerestanovki(int from = -1)
+    public Path AnalyzePerestanovki(int from = -1)
     {
         int count = _problem.Points.Count;
         HashSet<int> initSet = new();
@@ -93,30 +93,30 @@ public class BruteForceTransportProblem
             initSet.Add(i);
 
         HashSet<List<int>> firstElem = new();
-        if (from < 0)        
-            for (int i = 0; i < count; i++)            
-                firstElem.Add(new List<int>() { i });                    
-        else        
+        if (from < 0)
+            for (int i = 0; i < count; i++)
+                firstElem.Add(new List<int>() { i });
+        else
             firstElem.Add(new List<int>() { from });
-        
+
 
         double min = double.MaxValue;
         List<int> min_Path = new();
 
         Stack<List<int>> stack = new();
-        foreach (var item in firstElem)            
+        foreach (var item in firstElem)
             stack.Push(item);
         int countPer = 0;
-        while (stack.Count>0)
+        while (stack.Count > 0)
         {
             var elem = stack.Pop();
             if (elem.Count < count)
             {
                 var dop = Dopolnenie(initSet, elem);
-                foreach (var item in dop)                    
-                    stack.Push(item);                    
+                foreach (var item in dop)
+                    stack.Push(item);
             }
-            else if (elem.Count==count)
+            else if (elem.Count == count)
             {
                 var length = _problem.Length(elem);
                 //printLn(elem, length);
@@ -135,7 +135,8 @@ public class BruteForceTransportProblem
         printLn("");
         printLn($"Minimum Result");
         printLn(min_Path, min);
-
+        var path = new Path(min_Path, _problem, "Minimum Result");
+        return path;
     }
     private static HashSet<List<int>> CreatePerestanovki(int count, int from = -1)
     {
@@ -143,12 +144,12 @@ public class BruteForceTransportProblem
         for (int i = 0; i < count; i++)
             initSet.Add(i);
         HashSet<List<int>> firstElem = new();
-        if (from < 0)            
-            for (int i = 0; i < count; i++)                
-                firstElem.Add(new List<int>() { i });                            
-        else            
+        if (from < 0)
+            for (int i = 0; i < count; i++)
+                firstElem.Add(new List<int>() { i });
+        else
             firstElem.Add(new List<int>() { from });
-        
+
         var prevResult = firstElem;
         var nextResult = new HashSet<List<int>>();
         for (int i = 0; i < count - 1; i++)

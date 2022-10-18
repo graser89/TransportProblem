@@ -13,47 +13,59 @@ public class CenterMassSolver
         _problem = problem;
     }
 
-    public List<int> FindOptPath(double weight)
+    public Path FindOptimumPath()
     {
-        double min = double.MaxValue;
-        int indexMin = -1;
-        var AllResult = new List<List<int>>();
+        var AllResult = new List<Path>();
+
+        for (int i = 1; i < 10; i++)
+        {
+            var path = this.FindOptPath(i);
+            AllResult.Add(path);
+        }
+        for (int i = 1; i < 10; i++)
+        {
+            var x = i / 10.0;
+            var path = this.FindOptPath(x);
+            AllResult.Add(path);
+        }
+        {
+            var path_23 = this.FindOptPath(2 / 3.0);
+            var path_005 = this.FindOptPath(0.05);
+            var path_Opt = this.FindOptPathMass();
+            AllResult.Add(path_23);
+            AllResult.Add(path_005);
+            AllResult.Add(path_Opt);
+        }
+        AllResult.Sort();
+        return AllResult.First();
+
+    }
+
+    public Path FindOptPath(double weight)
+    {
+        var AllResult = new List<Path>();
         for (int i = 0; i < _problem.Points.Count; i++)
         {
-            var path_i = FindPath(i, weight);
-            var length = _problem.Length(path_i);
+            var points_i = FindPath(i, weight);
+            var path_i = new Path(points_i, _problem, $"OptPath w={weight}");
             AllResult.Add(path_i);
-            if (length < min)
-            {
-                min = length;
-                indexMin = i;
-                printLn(path_i, length);
-            }
-
         }
-        return AllResult[indexMin];
+        AllResult.Sort();
+        return AllResult.First();
     }
-    public List<int> FindOptPathMass()
+    private Path FindOptPathMass()
     {
-        double min = double.MaxValue;
-        int indexMin = -1;
-        var AllResult = new List<List<int>>();
+        List<Path> AllResult = new();
         for (int i = 0; i < _problem.Points.Count; i++)
         {
-            var path_i = FindPathMass(i);
-            var length = _problem.Length(path_i);
+            var points_i = FindPathMass(i);
+            var path_i = new Path(points_i, _problem, $"OptPathMass");
             AllResult.Add(path_i);
-            if (length < min)
-            {
-                min = length;
-                indexMin = i;
-                printLn(path_i, length);
-            }
-
         }
-        return AllResult[indexMin];
+        AllResult.Sort();
+        return AllResult.First();
     }
-    public List<int> FindPath(int startPoint,double weight)
+    private List<int> FindPath(int startPoint, double weight)
     {
         var result = new List<int>();
         result.Add(startPoint);
@@ -63,13 +75,13 @@ public class CenterMassSolver
         PointD currentpoint = new PointD() { X = startPointInt.X, Y = startPointInt.Y };
 
         var AllPointIndex = new HashSet<int>();
-        for (int i = 0; i < _problem.Points.Count; i++)            
+        for (int i = 0; i < _problem.Points.Count; i++)
             AllPointIndex.Add(i);
 
 
         var other = new List<int>(AllPointIndex);
         other.Remove(startPoint);
-        while (other.Count>0)
+        while (other.Count > 0)
         {
             var length = _problem.GetLengthsBeforPointAndSeqPoints(currentpoint, other);
             var min = length.Min();
@@ -81,7 +93,7 @@ public class CenterMassSolver
         }
         return result;
     }
-    public List<int> FindPathMass(int startPoint)
+    private List<int> FindPathMass(int startPoint)
     {
         var result = new List<int>();
         result.Add(startPoint);
