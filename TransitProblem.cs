@@ -156,19 +156,31 @@ public class TransitProblemInt
     public PointD GetWeightAveragePoint(PointD p, int index, double weight1, double weight2)
     {
         var p2 = Points[index];
-        var x = (p.X * weight1 + p2.X * weight2) / (weight1 + weight2);
-        var y = (p.Y * weight1 + p2.Y * weight2) / (weight1 + weight2);
-
-        return new PointD() { X = x, Y = y };
+        return CenterMass.GetPoint(p, p2, weight1, weight2);
     }
     public PointD GetWeightAveragePoint(PointInt p, int index, double weight1, double weight2)
     {
         var p2 = Points[index];
-        var x = (p.X * weight1 + p2.X * weight2) / (weight1 + weight2);
-        var y = (p.Y * weight1 + p2.Y * weight2) / (weight1 + weight2);
-
-        return new PointD() { X = x, Y = y };
+        return CenterMass.GetPoint(p, p2, weight1, weight2);
     }
+
+    public List<double> GetLengthsBeforPointAndSeqPointsMoveToCenterMass(PointD p, List<int> indexs, double w)
+    {
+        var points = new List<PointInt>();
+        foreach (var index in indexs)
+            points.Add(Points[index]);
+
+        PointD cp = CenterMass.GetCentrePoint(points);
+        var w1 = indexs.Count;
+        var result = new List<double>();
+        foreach (var index in indexs)
+        {
+            var pc_i = CenterMass.GetPoint(cp, Points[index], w1, w);
+            result.Add(Length(p, pc_i));
+        }
+        return result;
+    }
+
 
 }
 
